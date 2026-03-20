@@ -5,7 +5,7 @@
 // ============================================================
 
 import { supabase } from './supabase';
-import type { CRMLead, CRMDatabase, LeadQuality, SampleStatus } from '../data/crm';
+import type { CRMLead, CRMDatabase, CRMAccount, LeadQuality, SampleStatus } from '../data/crm';
 
 // ---------- Fetch all leads (returns existing CRMLead format) ----------
 export async function fetchAllLeadsLive(): Promise<CRMLead[]> {
@@ -110,15 +110,17 @@ export async function createLeadLive(lead: {
   notes?: string;
 }): Promise<CRMLead | null> {
   // Generate next display ID
-  const { data: lastLead } = await supabase
+  const { data: allLeads } = await supabase
     .from('crm_leads')
-    .select('display_id')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .select('display_id');
 
-  const lastNum = lastLead ? parseInt(lastLead.display_id.replace('CL', '')) : 0;
-  const display_id = `CL${String(lastNum + 1).padStart(3, '0')}`;
+  const maxNum = (allLeads || []).reduce((max, l) => {
+    const num = parseInt(l.display_id.replace('CL', ''));
+    return num > max ? num : max;
+  }, 0);
+  const display_id = `CL${String(maxNum + 1).padStart(3, '0')}`;
+
+  
 
   const { data, error } = await supabase
     .from('crm_leads')
@@ -247,6 +249,71 @@ export async function fetchSalespeopleLive() {
     leadsAssigned: 0,
     accountsConverted: 0,
   }));
+}
+
+// ======================== INTERNAL: Map Supabase row → CRMLead ========================
+
+// ======================== ACCOUNTS ========================
+
+export async function fetchAllAccountsLive(): Promise<CRMAccount[]> {
+  const { data, error } = await supabase
+    .from('crm_accounts')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching accounts:', error);
+    return [];
+  }
+  return data.map((row: any) => mapToLegacyAccount(row));
+}
+
+export async function fetchAccountByIdLive(displayId: string): Promise<CRMAccount | null> {
+  const { data, error } = await supabase
+    .from('crm_accounts')
+    .select('*')
+    .eq('display_id', displayId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapToLegacyAccount(data);
+}
+
+function mapToLegacyAccount(row: any): CRMAccount {
+  return {
+    id: row.display_id || row.id,
+    fromLeadId: row.from_lead_id || '',
+    businessName: row.business_name,
+    contactPerson: row.contact_person,
+    mobile: row.mobile,
+    email: row.email || '',
+    city: row.city || '',
+    state: row.state || '',
+    territory: row.territory || '',
+    zone: row.zone || '',
+    accountType: row.account_type as any,
+    classification: row.classification || 'dealer_with_sample',
+    health: row.health || 'good',
+    assignedUserId: row.assigned_user_id || '',
+    assignedUserName: '',
+    convertedBy: row.converted_by || '',
+    conversionDate: row.conversion_date || '',
+    daysToConvert: row.days_to_convert || 0,
+    totalOrderValue: Number(row.total_order_value) || 0,
+    totalOrders: row.total_orders || 0,
+    lastOrderDate: row.last_order_date || null,
+    outstandingAmount: Number(row.outstanding_amount) || 0,
+    sampleKitsProvided: row.sample_kits_provided || 0,
+    displayInstalled: row.display_installed || false,
+    gstNumber: row.gst_number || '',
+    address: row.address || '',
+    notes: row.notes || '',
+    isActive: row.is_active !== false,
+    showOnLocator: row.show_on_locator || false,
+    locatorPriority: row.locator_priority || 0,
+    latitude: Number(row.latitude) || 0,
+    longitude: Number(row.longitude) || 0,
+  };
 }
 
 // ======================== INTERNAL: Map Supabase row → CRMLead ========================

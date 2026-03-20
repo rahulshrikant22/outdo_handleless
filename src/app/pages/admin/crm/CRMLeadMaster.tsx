@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { PageShell } from "../../../components/layout/PageShell";
 import { StatCard } from "../../../components/layout/StatCard";
@@ -9,6 +9,7 @@ import {
 import { FollowUpModal, ConvertLeadModal, BadLeadModal, SampleKitModal } from "../../../components/crm/CRMModals";
 import { handleExport } from "../../../components/shared/GlobalModals";
 import { useLeads } from "../../../lib/useLeads";
+import { createLeadLive, fetchSalespeopleLive } from "../../../lib/supabase-adapter";
 import type { CRMLead } from "../../../data/crm";
 import {
   crmSalespeople, allCities, allStates,
@@ -56,17 +57,40 @@ function AddLeadModal({ open, onClose }: { open: boolean; onClose: () => void })
     notes: "",
   });
   const [submitted, setSubmitted] = useState(false);
+    const [salespeople, setSalespeople] = useState<any[]>([]);
+  useEffect(() => {
+    fetchSalespeopleLive().then(data => setSalespeople(data));
+  }, []);
 
   if (!open) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setForm({ database: "dealer", businessName: "", contactPerson: "", mobile: "", email: "", city: "", state: "", territory: "", quality: "cold", assignedUserId: "", notes: "" });
-      onClose();
-    }, 1500);
+    try {
+      const result = await createLeadLive({
+        database: form.database as any,
+        businessName: form.businessName,
+        contactPerson: form.contactPerson,
+        mobile: form.mobile,
+        email: form.email,
+        city: form.city,
+        state: form.state,
+        territory: form.territory,
+        quality: form.quality,
+        assignedUserId: form.assignedUserId || undefined,
+        notes: form.notes,
+      });
+      if (result) {
+        setSubmitted(true);
+        setTimeout(() => {
+          setSubmitted(false);
+          setForm({ database: "dealer", businessName: "", contactPerson: "", mobile: "", email: "", city: "", state: "", territory: "", quality: "cold", assignedUserId: "", notes: "" });
+          onClose();
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Failed to create lead:', err);
+    }
   };
 
   return (
@@ -152,7 +176,7 @@ function AddLeadModal({ open, onClose }: { open: boolean; onClose: () => void })
                 <label className="block text-muted-foreground mb-1.5" style={{ fontSize: 12.5, fontWeight: 500 }}>Assign to Salesperson *</label>
                 <select value={form.assignedUserId} onChange={(e) => setForm({ ...form, assignedUserId: e.target.value })} className="w-full h-10 rounded-lg border border-border px-3 bg-background" style={{ fontSize: 13.5 }} required>
                   <option value="">Select Salesperson</option>
-                  {crmSalespeople.map((sp) => <option key={sp.id} value={sp.id}>{sp.name} — {sp.territory}</option>)}
+                  {salespeople.map((sp) => <option key={sp.id} value={sp.id}>{sp.name} — {sp.territory}</option>)}
                 </select>
               </div>
             </div>

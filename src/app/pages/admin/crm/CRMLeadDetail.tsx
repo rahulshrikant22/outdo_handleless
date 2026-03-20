@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { PageShell } from "../../../components/layout/PageShell";
 import {
@@ -7,6 +7,7 @@ import {
 import { FollowUpModal, ConvertLeadModal, BadLeadModal, SampleKitModal } from "../../../components/crm/CRMModals";
 import { EditLeadModal } from "../../../components/shared/GlobalModals";
 import { toast } from "sonner";
+import { fetchLeadByIdLive } from "../../../lib/supabase-adapter";
 import { getCRMLeadById, getCRMAccountById, getLeadAgingDays } from "../../../data/crm";
 import {
   ArrowLeft, Calendar, Phone, Mail, MessageSquare, MapPin, CheckCircle2,
@@ -30,7 +31,14 @@ const followUpTypeIcons: Record<string, React.ReactNode> = {
 export function CRMLeadDetail() {
   const { leadId } = useParams();
   const navigate = useNavigate();
-  const lead = getCRMLeadById(leadId || "");
+  const staticLead = getCRMLeadById(leadId || "");
+  const [lead, setLead] = useState(staticLead);
+
+  useEffect(() => {
+    if (leadId) {
+      fetchLeadByIdLive(leadId).then(data => { if (data) setLead(data); });
+    }
+  }, [leadId]);
 
   const [followUpModal, setFollowUpModal] = useState(false);
   const [convertModal, setConvertModal] = useState(false);

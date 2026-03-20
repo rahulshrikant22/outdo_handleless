@@ -8,13 +8,14 @@ import {
 } from "../shared";
 import { FollowUpModal } from "./CRMModals";
 import type { CRMLead } from "../../data/crm";
-import { crmLeads, getLeadAgingDays } from "../../data/crm";
+import { getLeadAgingDays } from "../../data/crm";
 import {
   Users, Flame, ThermometerSun, Snowflake, CheckCircle2, XCircle,
   Phone, Mail, MessageSquare, MapPin, Calendar, ArrowRight, Download
 } from "lucide-react";
 
 import { handleExport } from "../shared/GlobalModals";
+import { useLeads } from "../../lib/useLeads";
 
 const qualityIcons: Record<string, React.ReactNode> = {
   hot: <Flame size={13} className="text-red-500" />,
@@ -36,10 +37,11 @@ interface PartnerLeadManagementProps {
 
 export function PartnerLeadManagement({ role, partnerName }: PartnerLeadManagementProps) {
   const navigate = useNavigate();
+  const { leads: allLeads } = useLeads();
 
   // Simulate partner seeing leads assigned/transferred to them
   // In real app this would filter by logged-in user. Using leads from matching database + transferred organic leads.
-  const myLeads = crmLeads.filter(l =>
+  const myLeads = allLeads.filter(l =>
     l.database === role ||
     (l.database === "organic" && l.transferredToPartner !== null)
   ).slice(0, 8); // Limit for demo

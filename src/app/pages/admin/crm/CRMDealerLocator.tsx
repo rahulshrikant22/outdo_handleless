@@ -5,7 +5,8 @@ import {
   DetailField, SummaryCard, AlertCard, Modal, InputField, SelectField
 } from "../../../components/shared";
 import type { CRMAccount } from "../../../data/crm";
-import { crmAccounts, formatClassification, allCities, allStates, allZones } from "../../../data/crm";
+import { formatClassification, allCities, allStates, allZones } from "../../../data/crm";
+import { useAccounts } from "../../../lib/useAccounts";
 import {
   MapPin, Globe, Edit, Eye, ToggleLeft, ToggleRight, ArrowUp, ArrowDown,
   Download, Building2, CheckCircle2, XCircle, Search
@@ -15,6 +16,7 @@ import { handleExport } from "../../../components/shared/GlobalModals";
 import { toast } from "sonner";
 
 export function CRMDealerLocator() {
+  const { accounts: crmAccounts } = useAccounts();
   const allDealers = crmAccounts.filter(a => a.accountType === "dealer");
   const [search, setSearch] = useState("");
   const [locatorFilter, setLocatorFilter] = useState("");

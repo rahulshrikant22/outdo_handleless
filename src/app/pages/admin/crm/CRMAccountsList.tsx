@@ -8,9 +8,10 @@ import {
 } from "../../../components/shared";
 import type { CRMAccount } from "../../../data/crm";
 import {
-  crmAccounts, crmSalespeople, getActiveAccounts, getAccountsByType,
+  crmSalespeople,
   formatClassification, formatCurrency, allCities, allStates, allZones
 } from "../../../data/crm";
+import { useAccounts } from "../../../lib/useAccounts";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from "recharts";
@@ -35,6 +36,7 @@ const PIE_COLORS = ["#1B2A4A", "#EC6E63", "#8B5CF6", "#10b981", "#ef4444"];
 
 export function CRMAccountsList() {
   const navigate = useNavigate();
+  const { accounts: crmAccounts, loading: accountsLoading, refresh } = useAccounts();
   const [activeTab, setActiveTab] = useState("list");
 
   // Filters
@@ -64,11 +66,11 @@ export function CRMAccountsList() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
 
-  // Stats
-  const active = getActiveAccounts().length;
-  const dealers = getAccountsByType("dealer").length;
-  const factories = getAccountsByType("factory").length;
-  const architects = getAccountsByType("architect").length;
+  // Stats (calculated from live data)
+  const active = crmAccounts.filter(a => a.isActive).length;
+  const dealers = crmAccounts.filter(a => a.accountType === "dealer").length;
+  const factories = crmAccounts.filter(a => a.accountType === "factory").length;
+  const architects = crmAccounts.filter(a => a.accountType === "architect").length;
   const totalValue = crmAccounts.reduce((s, a) => s + a.totalOrderValue, 0);
   const totalOutstanding = crmAccounts.reduce((s, a) => s + a.outstandingAmount, 0);
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { PageShell } from "../../../components/layout/PageShell";
 import { StatCard } from "../../../components/layout/StatCard";
@@ -9,6 +9,7 @@ import {
   getCRMAccountById, getCRMLeadById, crmLeads, formatClassification,
   formatCurrency
 } from "../../../data/crm";
+import { fetchAccountByIdLive } from "../../../lib/supabase-adapter";
 import { projectOrders } from "../../../data/orders";
 import { getConvertedOrderByOrderId } from "../../../data/operations";
 import { financeRecords } from "../../../data/finance";
@@ -45,9 +46,16 @@ const monthlyPerformance = [
 export function CRMAccountDetail() {
   const { accountId } = useParams();
   const navigate = useNavigate();
-  const account = getCRMAccountById(accountId || "");
+  const staticAccount = getCRMAccountById(accountId || "");
+  const [account, setAccount] = useState(staticAccount);
   const [activeTab, setActiveTab] = useState("overview");
   const [editAccountOpen, setEditAccountOpen] = useState(false);
+
+  useEffect(() => {
+    if (accountId) {
+      fetchAccountByIdLive(accountId).then(data => { if (data) setAccount(data); });
+    }
+  }, [accountId]);
 
   if (!account) {
     return (

@@ -8,9 +8,10 @@ import {
 } from "../shared";
 import { FollowUpModal, ConvertLeadModal, BadLeadModal, SampleKitModal } from "./CRMModals";
 import { handleExport, AddLeadToDBModal } from "../shared/GlobalModals";
+import { useLeads } from "../../lib/useLeads";
 import type { CRMLead, CRMDatabase } from "../../data/crm";
 import {
-  getLeadsByDatabase, getLeadAgingDays, allCities, allStates,
+  getLeadAgingDays, allCities, allStates,
   crmSalespeople
 } from "../../data/crm";
 import {
@@ -42,7 +43,7 @@ const followUpTypeIcons: Record<string, React.ReactNode> = {
 export function LeadDatabasePage({ database }: { database: CRMDatabase }) {
   const navigate = useNavigate();
   const config = dbConfig[database];
-  const allLeads = getLeadsByDatabase(database);
+  const { leads: allLeads, loading: leadsLoading, refresh } = useLeads(database);
 
   const [search, setSearch] = useState("");
   const [qualityFilter, setQualityFilter] = useState("");
