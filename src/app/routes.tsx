@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 
 import { RoleSelector } from "./pages/RoleSelector";
 import { AppShell } from "./components/layout/AppShell";
@@ -112,8 +112,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: AdminDashboard },
       // Legacy routes (kept for backward compat)
-      { path: "leads", Component: AdminLeads },
-      { path: "accounts", Component: AdminAccounts },
+      { path: "leads", element: <Navigate to="/admin/crm/leads" replace /> },
+      { path: "accounts", element: <Navigate to="/admin/crm/accounts" replace /> },
       // CRM Module
       { path: "crm/leads", Component: CRMLeadMaster },
       { path: "crm/leads/:leadId", Component: CRMLeadDetail },

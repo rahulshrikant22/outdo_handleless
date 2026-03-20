@@ -142,7 +142,7 @@ export function OrdersDashboard() {
                         <span className={q.days > 45 ? "text-red-600" : q.days > 20 ? "text-amber-600" : ""} style={{ fontWeight: 500 }}>{q.days}d</span>
                       </td>
                       <td className="py-2">
-                        <Button variant="ghost" size="sm" icon={<ArrowRight size={13} />}>View</Button>
+                        <Button variant="ghost" size="sm" icon={<ArrowRight size={13} />} onClick={(e: React.MouseEvent) => { e.stopPropagation(); navigate(`/admin/orders/quotation/${q.id}`); }}>View</Button>
                       </td>
                     </tr>
                   ))}
