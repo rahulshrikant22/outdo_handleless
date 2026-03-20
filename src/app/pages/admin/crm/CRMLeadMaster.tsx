@@ -8,9 +8,10 @@ import {
 } from "../../../components/shared";
 import { FollowUpModal, ConvertLeadModal, BadLeadModal, SampleKitModal } from "../../../components/crm/CRMModals";
 import { handleExport } from "../../../components/shared/GlobalModals";
+import { useLeads } from "../../../lib/useLeads";
 import type { CRMLead } from "../../../data/crm";
 import {
-  crmLeads, crmSalespeople, allCities, allStates,
+  crmSalespeople, allCities, allStates,
   allTerritoryNames, getLeadAgingDays,
   getCitySummary, getSalespersonSummary, getLeadsByDatabase
 } from "../../../data/crm";
@@ -272,6 +273,7 @@ function TransferModal({ open, onClose, database }: { open: boolean; onClose: ()
 export function CRMLeadMaster() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("list");
+  const { leads: crmLeads, loading, refresh } = useLeads();
 
   // Filters
   const [search, setSearch] = useState("");
