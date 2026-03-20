@@ -16,6 +16,7 @@ import {
   Calendar, MapPin, User, ExternalLink, CheckCircle2, Clock,
   Wrench, DollarSign, ArrowRight,
 } from "lucide-react";
+import { EditOrderModal } from "../../../components/shared/GlobalModals";
 
 export function OrderDetail() {
   const { orderId } = useParams();
