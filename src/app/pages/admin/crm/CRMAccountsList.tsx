@@ -15,7 +15,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from "recharts";
 import {
-  Plus, Download, Building2, Phone, Mail, MapPin, ArrowRight, ChevronRight, Edit, Wallet, CheckCircle2
+  Plus, Download, Building2, Phone, Mail, MapPin, ArrowRight, ChevronRight, Edit, Wallet, CheckCircle2, CreditCard, TrendingUp, Users
 } from "lucide-react";
 import { handleExport, AddAccountModal } from "../../../components/shared/GlobalModals";
 import { toast } from "sonner";
